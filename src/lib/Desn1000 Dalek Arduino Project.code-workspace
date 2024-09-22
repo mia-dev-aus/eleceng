@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../source/repos/Desn1000 Dalek Arduino Project"
+		},
+		{
+			"name": "Desn1000 Dalek Arduino Project",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"xlocale": "cpp",
+			"xstring": "cpp",
+			"char_traits": "cpp",
+			"string": "cpp",
+			"valarray": "cpp",
+			"xiosbase": "cpp",
+			"ios": "cpp"
+		}
+	}
+}
