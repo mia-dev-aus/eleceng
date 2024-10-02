@@ -1,4 +1,5 @@
 #include "dalek_class.h"
+#include "mux.h"
 #include <Arduino.h>
 
 void Dalek::turn_left() {
@@ -26,15 +27,9 @@ void Dalek::led_setup() {
 }
 
 void Dalek::update_sensor_data() {
-    ir_sensors[0] = analogRead(IR_SENSOR_4);
-    ir_sensors[1] = analogRead(IR_SENSOR_3);
-    ir_sensors[2] = analogRead(IR_SENSOR_2);
-    ir_sensors[3] = analogRead(IR_SENSOR_1);
-    ir_sensors[4] = analogRead(IR_SENSOR0);
-    ir_sensors[5] = analogRead(IR_SENSOR1);
-    ir_sensors[6] = analogRead(IR_SENSOR2);
-    ir_sensors[7] = analogRead(IR_SENSOR3);
-    ir_sensors[8] = analogRead(IR_SENSOR4);
+    for (int i{0}; i < num_ir_sensors; ++i) {
+        ir_sensors[i] = read_mux_analog_pin(i);
+    }
 }
 
 void Dalek::update_leds() {

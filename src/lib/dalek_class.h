@@ -1,18 +1,6 @@
 #ifndef DALEK_CLASS_H
 #define DALEK_CLASS_H
 
-// Need to setup analog multiplexor
-#define IR_SENSOR_4 A0
-#define IR_SENSOR_3 A1
-#define IR_SENSOR_2 A3
-#define IR_SENSOR_1 A4
-#define IR_SENSOR0 A5
-#define IR_SENSOR1 A6
-#define IR_SENSOR2 A7
-// Not enough analog inputs for sensor 3 and 4.
-#define IR_SENSOR3 A7
-#define IR_SENSOR4 A7
-
 // LEDs
 constexpr int left_led{2};
 constexpr int mid_led{4};
