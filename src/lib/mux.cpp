@@ -1,14 +1,11 @@
+#include "constants.h"
 #include "mux.h"
 #include <Arduino.h>
 
-constexpr int signal_pin{A0};
-constexpr int mux_pin0{8};
-constexpr int mux_pin1{9};
-constexpr int mux_pin2{10};
-constexpr int mux_pin3{11};
 
 int read_mux_analog_pin(int pin) {
     reset_mux_pins();
+    delay(time_delay_ms);
 
     // Convert pin integer to binary output
     if  (pin % 2 == 1) {
@@ -27,6 +24,7 @@ int read_mux_analog_pin(int pin) {
         digitalWrite(mux_pin3, HIGH);
     }
     
+    delay(time_delay_ms);
     return analogRead(signal_pin);
 };
 

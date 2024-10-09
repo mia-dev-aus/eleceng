@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "dalek_class.h"
 #include "mux.h"
 #include <Arduino.h>
@@ -26,13 +27,15 @@ void Dalek::led_setup() {
 	pinMode(right_led, OUTPUT);
 }
 
-void Dalek::update_sensor_data() {
+int Dalek::update_sensor_data() {
     for (int i{0}; i < num_ir_sensors; ++i) {
         ir_sensors[i] = read_mux_analog_pin(i);
+        delay(time_delay_ms);
     }
+    return update_sensor_data_time;
 }
 
-void Dalek::update_leds() {
+int Dalek::update_leds() {
     if (left) {
 		digitalWrite(left_led, HIGH);
 		digitalWrite(right_led, LOW);
@@ -46,4 +49,6 @@ void Dalek::update_leds() {
 		digitalWrite(right_led, LOW);
 		digitalWrite(mid_led, HIGH);
 	}
+
+    return update_leds_time;
 }
