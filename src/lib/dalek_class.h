@@ -1,6 +1,9 @@
 #ifndef DALEK_CLASS_H
 #define DALEK_CLASS_H
 
+#include "constants.h"
+#include <Arduino.h>
+
 class Dalek {
 	private:	
 	// Indicate if the dalek needs to turn left, right, or not turn to face the target.
@@ -20,9 +23,9 @@ class Dalek {
 	// Sets up the Digital pins for LED output.
 	void led_setup();
 	// Gets the sensor data from IR sensors.
-	int update_sensor_data();
+	uint32_t update_sensor_data();
 	// Updates led output depending on direction.
-	int update_leds();
+	uint32_t update_leds();
 
 };
 

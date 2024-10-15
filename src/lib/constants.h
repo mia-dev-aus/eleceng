@@ -12,7 +12,7 @@ constexpr int right_led{7};
 constexpr int num_ir_sensors{9};
 
 // Mux pins
-constexpr int signal_pin{A0};
+#define MUX_SIGNAL_PIN A0
 constexpr int mux_pin0{8};
 constexpr int mux_pin1{9};
 constexpr int mux_pin2{10};

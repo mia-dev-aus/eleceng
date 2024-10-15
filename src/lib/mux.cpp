@@ -25,7 +25,7 @@ int read_mux_analog_pin(int pin) {
     }
     
     delay(time_delay_ms);
-    return analogRead(signal_pin);
+    return analogRead(MUX_SIGNAL_PIN);
 };
 
 void reset_mux_pins() {

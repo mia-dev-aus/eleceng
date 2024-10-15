@@ -27,7 +27,7 @@ void Dalek::led_setup() {
 	pinMode(right_led, OUTPUT);
 }
 
-int Dalek::update_sensor_data() {
+uint32_t Dalek::update_sensor_data() {
     for (int i{0}; i < num_ir_sensors; ++i) {
         ir_sensors[i] = read_mux_analog_pin(i);
         delay(time_delay_ms);
@@ -35,7 +35,7 @@ int Dalek::update_sensor_data() {
     return update_sensor_data_time;
 }
 
-int Dalek::update_leds() {
+uint32_t Dalek::update_leds() {
     if (left) {
 		digitalWrite(left_led, HIGH);
 		digitalWrite(right_led, LOW);

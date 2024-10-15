@@ -13,7 +13,7 @@ void setup() {
 }
 
 void loop() {
-	int service_times[num_services] = {0};
+	uint32_t service_times[num_services] = {0};
 	uint32_t curr_time = millis();
 	// Max time before next service executes.
 	uint32_t next_time = curr_time + max_time_delay_ms;
