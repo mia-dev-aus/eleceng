@@ -2,6 +2,12 @@
 #include "mux.h"
 #include <Arduino.h>
 
+void mux_setup() {
+    pinMode(mux_pin0, OUTPUT);
+    pinMode(mux_pin1, OUTPUT);
+    pinMode(mux_pin2, OUTPUT);
+    pinMode(mux_pin3, OUTPUT);
+}
 
 int read_mux_analog_pin(int pin) {
     reset_mux_pins();
