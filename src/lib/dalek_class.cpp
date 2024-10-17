@@ -66,9 +66,9 @@ uint32_t Dalek::update_sound_data() {
     uint32_t curr_time = millis();
 
     while (millis() - curr_time < max_wait) {
-        int mic0 = (digitalRead(mic_mid_pin) && !mic0) ? micros() : 0;
-        int mic1 = (digitalRead(mic_left_pin) && !mic1) ? micros() : 0;
-        int mic2 = (digitalRead(mic_right_pin) && !mic2) ? micros() : 0;
+        microphones.left = (digitalRead(mic_mid_pin) && !microphones.left) ? micros() : 0;
+        microphones.mid = (digitalRead(mic_left_pin) && !microphones.mid) ? micros() : 0;
+        microphones.right = (digitalRead(mic_right_pin) && !microphones.right) ? micros() : 0;
     }
 
     return update_sound_data_time;
