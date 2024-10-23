@@ -60,11 +60,11 @@ double calc_pol_dir() {
 	uint32_t time_diff1 = dalek.microphones.mid - dalek.microphones.mid;
 	uint32_t time_diff2 = dalek.microphones.mid - dalek.microphones.right;
 	uint32_t time_diff3 = dalek.microphones.left - dalek.microphones.right;
-
+ 
 	double radius = mic_radius_mil * 1000;
 
-	double x{(time_diff3 * sound_speed * 1.0) / (2 *sqrt(3.0) * radius)};
-	double y{(time_diff2 * sound_speed * 1.0 - x*radius*sqrt(3.0) / (sound_speed * 1.0)) * (sound_speed*1.0/(-3*radius*1.0))};
+	double x{(time_diff3 * sound_speed * pow(10, -6)) / (2 *sqrt(3.0) * radius)};
+	double y{(time_diff2 * sound_speed * pow(10,  -6) - x*radius*sqrt(3.0) / (sound_speed * 1.0)) * (sound_speed*1.0/(-3*radius*1.0))};
 
 	if (x > 0.0 && y > 0.0) {
 		// First quad

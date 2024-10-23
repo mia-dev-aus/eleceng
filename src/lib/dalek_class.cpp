@@ -35,11 +35,37 @@ void Dalek::mic_setup() {
 
 uint32_t Dalek::update_ir_data() {
     for (int i{0}; i < num_ir_sensors; ++i) {
-        ir_sensors[i] = read_mux_analog_pin(i);
-        delay(time_delay_ms);
+        // for (int j{0}; j < data_length; ++j) {
+            ir_sensors[i] = read_mux_analog_pin(i);
+        // }
     }
     return update_ir_data_time;
 }
+
+// Brielle's code
+// void Dalek::applyIIRFilter(int32_t *data, int length, int64_t *a, int64_t *b, int64_t *outputArray) {
+//  int order = FILTER_ORDER;
+//  int64_t x[FILTER_ORDER + 1] = {0};
+//  int64_t y[FILTER_ORDER + 1] = {0};
+//  for (int n = 0; n < length; n++) {
+//  for (int i = order; i > 0; i--) {
+//  x[i] = x[i - 1];
+//  }
+//  x[0] = (int64_t)data[n] * SCALE_FACTOR;
+//  int64_t filteredValue = 0;
+//  for (int i = 0; i <= order; i++) {
+//  filteredValue += b[i] * x[i];
+//  }
+//  for (int i = 1; i <= order; i++) {
+//  filteredValue -= a[i] * y[i - 1];
+//  }
+//  for (int i = order - 1; i > 0; i--) {
+//  y[i] = y[i - 1];
+//  }
+//  y[0] = filteredValue / SCALE_FACTOR;
+//  outputArray[n] = filteredValue / SCALE_FACTOR;
+//  }
+// }
 
 uint32_t Dalek::update_leds() {
     if (left) {

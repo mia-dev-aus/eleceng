@@ -5,20 +5,19 @@ constexpr int time_delay_ms{5};
 constexpr int max_time_delay_ms{5000};
 
 // LEDs
-constexpr int left_led{2};
-constexpr int mid_led{3};
-constexpr int right_led{4};
+constexpr int left_led{3};
+constexpr int mid_led{2};
+constexpr int right_led{1};
 
 // Sensors
 constexpr int num_ir_sensors{9};
 constexpr int num_mic{3};
 
-// Mux pins
-#define MUX_SIGNAL_PIN A0
-constexpr int mux_pin0{8};
-constexpr int mux_pin1{9};
-constexpr int mux_pin2{10};
-constexpr int mux_pin3{11};
+// Mux pins. From 0 - 8. E.G. mux_pin4 = mix_pin0 + 4
+#define MUX_SIGNAL_PIN1 A0
+#define MUX_SIGNAL_PIN2 A1
+#define MUX_SIGNAL_PIN3 A2
+constexpr int mux_pin0{2};
 
 // Service times
 constexpr int num_services{2};
@@ -35,5 +34,11 @@ constexpr int mic_radius_mil{};
 
 // Misc
 constexpr int sound_speed{343};
+
+// Filter
+// #define FILTER_ORDER 4
+// #define SCALE_FACTOR
+// constexpr int data_length = 9600;
+// constexpr int64_t a[FILTER_ORDER] = {};
 
 #endif

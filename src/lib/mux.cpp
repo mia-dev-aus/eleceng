@@ -2,41 +2,29 @@
 #include "mux.h"
 #include <Arduino.h>
 
+// The analog pins will be labelled from right to left, 0 - 9.
+
 void mux_setup() {
-    pinMode(mux_pin0, OUTPUT);
-    pinMode(mux_pin1, OUTPUT);
-    pinMode(mux_pin2, OUTPUT);
-    pinMode(mux_pin3, OUTPUT);
+    for (int i = 0; i < 9; ++i) {
+        pinMode(mux_pin0 + i, OUTPUT);
+    }
 }
 
 int read_mux_analog_pin(int pin) {
     reset_mux_pins();
-    delay(time_delay_ms);
+    digitalWrite(mux_pin0 + pin, HIGH);
 
-    // Convert pin integer to binary output
-    if  (pin % 2 == 1) {
-        digitalWrite(mux_pin0, HIGH);
+    if (pin >= 0 && pin <= 2) {
+        return analogRead(MUX_SIGNAL_PIN1);
+    } else if (pin >= 3 && pin <= 5) {
+        return analogRead(MUX_SIGNAL_PIN2);
+    } else if (pin >= 6 && pin <= 8) {
+        return analogRead(MUX_SIGNAL_PIN3);
     }
-    pin /= 2;
-    if  (pin % 2 == 1) {
-        digitalWrite(mux_pin1, HIGH);
-    }
-    pin /= 2;
-    if  (pin % 2 == 1) {
-        digitalWrite(mux_pin2, HIGH);
-    }
-    pin /= 2;
-    if  (pin % 2 == 1) {
-        digitalWrite(mux_pin3, HIGH);
-    }
-    
-    delay(time_delay_ms);
-    return analogRead(MUX_SIGNAL_PIN);
 };
 
 void reset_mux_pins() {
-    digitalWrite(mux_pin0, LOW);
-    digitalWrite(mux_pin1, LOW);
-    digitalWrite(mux_pin2, LOW);
-    digitalWrite(mux_pin3, LOW);
+    for (int i = 0; i < 9; ++i) {
+        digitalWrite(mux_pin0 + i, LOW);
+    }
 }
