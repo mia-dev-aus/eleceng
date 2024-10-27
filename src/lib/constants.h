@@ -5,9 +5,9 @@ constexpr int time_delay_ms{5};
 constexpr int max_time_delay_ms{5000};
 
 // LEDs
-constexpr int left_led{3};
-constexpr int mid_led{2};
-constexpr int right_led{1};
+constexpr int left_led{13};
+constexpr int mid_led{12};
+constexpr int right_led{11};
 
 // Sensors
 constexpr int num_ir_sensors{9};

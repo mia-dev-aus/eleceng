@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include "lib/array.h"
-#include "lib/tests.h"
 #include "lib/mux.h"
 #include "lib/dalek_class.h"
 #include "lib/constants.h"
@@ -9,6 +8,7 @@ Dalek dalek{};
 void change_dir();
 
 void setup() {
+	Serial.begin(9600);
 	dalek.led_setup();
 	dalek.mic_setup();
 	mux_setup();
@@ -26,6 +26,13 @@ void loop() {
 			// In order of service occuring
 			switch (service) {
 			case 0:
+				// debugging
+				for (int i = 0; i < num_ir_sensors; ++i) {
+					Serial.print(dalek.ir_sensors[i]);
+					Serial.print(' ');
+				}
+				Serial.print('\n');
+
 				service_times[service] += dalek.update_ir_data();
 				change_dir();
 				break;
@@ -34,9 +41,9 @@ void loop() {
 				break;
 			}
 		}
-		next_time = (service_times[service] < next_time) ? service_times[service] : next_time;		
+		next_time = (service_times[service] + curr_time < next_time) ? service_times[service] + curr_time : next_time;		
 	}
-	delay(next_time - curr_time);
+	delay((next_time > curr_time) ? next_time - curr_time : 0);
 }
 
 // Helper function for main
@@ -56,28 +63,27 @@ void change_dir() {
 
 }
 
-double calc_pol_dir() {
-	uint32_t time_diff1 = dalek.microphones.mid - dalek.microphones.mid;
-	uint32_t time_diff2 = dalek.microphones.mid - dalek.microphones.right;
-	uint32_t time_diff3 = dalek.microphones.left - dalek.microphones.right;
- 
-	double radius = mic_radius_mil * 1000;
+// double calc_pol_dir() {
+// 	uint32_t time_diff1 = dalek.microphones.mid - dalek.microphones.mid;
+// 	uint32_t time_diff2 = dalek.microphones.mid - dalek.microphones.right;
+// 	uint32_t time_diff3 = dalek.microphones.left - dalek.microphones.right;
 
-	double x{(time_diff3 * sound_speed * pow(10, -6)) / (2 *sqrt(3.0) * radius)};
-	double y{(time_diff2 * sound_speed * pow(10,  -6) - x*radius*sqrt(3.0) / (sound_speed * 1.0)) * (sound_speed*1.0/(-3*radius*1.0))};
+// 	double radius = mic_radius_mil * 1000;
 
-	if (x > 0.0 && y > 0.0) {
-		// First quad
-		return atan(y/x);
-	} else if (x < 0.0 && y > 0.0) {
-		// Second quad
-		return PI + atan(y/x);
-	} else if (x < 0.0 && y < 0.0) {
-		// Third quad
-		return PI + atan(y/x);
-	} else {
-		// Fourth quad
-		return atan(y/x);
-	}
-}
+// 	double x{(time_diff3 * sound_speed * 1.0) / (2 *sqrt(3.0) * radius)};
+// 	double y{(time_diff2 * sound_speed * 1.0 - x*radius*sqrt(3.0) / (sound_speed * 1.0)) * (sound_speed*1.0/(-3*radius*1.0))};
 
+// 	if (x > 0.0 && y > 0.0) {
+// 		// First quad
+// 		return atan(y/x);
+// 	} else if (x < 0.0 && y > 0.0) {
+// 		// Second quad
+// 		return PI + atan(y/x);
+// 	} else if (x < 0.0 && y < 0.0) {
+// 		// Third quad
+// 		return PI + atan(y/x);
+// 	} else {
+// 		// Fourth quad
+// 		return atan(y/x);
+// 	}
+// }
