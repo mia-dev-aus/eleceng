@@ -1,0 +1,64 @@
+const int voltagePin = A0;
+const int exterPin = A1;
+const int clockwisePin = 9;
+const int counterclockwisePin = 10;
+const int speedPin = 11;  
+const int exterminatePin = 8;
+int speed;
+
+void setup() {
+  pinMode(clockwisePin, OUTPUT);
+  pinMode(counterclockwisePin, OUTPUT);
+  pinMode(speedPin, OUTPUT);
+  pinMode(exterminatePin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int analogValue = analogRead(voltagePin);
+  float voltage = analogValue * (5.0 / 1023.0); 
+
+  int exterValue = analogRead(exterPin);
+  float exterVolt = exterValue * (5.0 / 1023.0);
+
+  if (exterVolt >= 3) {
+    speed = 0;
+    analogWrite(speedPin, speed);  
+    digitalWrite(clockwisePin, LOW);
+    digitalWrite(counterclockwisePin, LOW);
+    digitalWrite(exterminatePin, HIGH);
+    Serial.println("Exterminate!");
+  } 
+
+  else if (voltage > 1.1) {  
+    speed = map(voltage * 100, 110, 200, 0, 255);
+    analogWrite(speedPin, speed);
+    digitalWrite(clockwisePin, HIGH);
+    digitalWrite(counterclockwisePin, LOW);
+    digitalWrite(exterminatePin, LOW);
+    Serial.print("Voltage: ");
+    Serial.print(voltage);
+    Serial.print(" V, Motor Speed: ");
+    Serial.println(speed);
+  } 
+  else if (voltage <= 0.9) {  
+    speed = map(voltage * 100, 0, 90, 255, 0);
+    analogWrite(speedPin, speed);
+    digitalWrite(clockwisePin, LOW);
+    digitalWrite(counterclockwisePin, HIGH);
+    digitalWrite(exterminatePin, LOW);
+    Serial.print("Voltage: ");
+    Serial.print(voltage);
+    Serial.print(" V, Motor Speed: ");
+    Serial.println(speed);
+  } 
+  else {
+    speed = 0;
+    analogWrite(speedPin, speed);
+    digitalWrite(clockwisePin, LOW);
+    digitalWrite(counterclockwisePin, LOW);
+    digitalWrite(exterminatePin, LOW);
+    Serial.println("Motor Stopped: Voltage below range.");
+  }
+  delay(100);
+}
