@@ -35,11 +35,17 @@ void Dalek::mic_setup() {
 
 uint32_t Dalek::update_ir_data() {
     for (int i{0}; i < num_ir_sensors; ++i) {
-        // for (int j{0}; j < data_length; ++j) {
-            ir_sensors[i] = read_mux_analog_pin(i);
-        // }
+        for (int j{0}; j < data_length; ++j) {
+            ir_data[i][j] = read_mux_analog_pin(i);
+        }
     }
     return update_ir_data_time;
+}
+
+void Dalek::apply_sub_filter(int32_t *data, int length, int32_t *new_data) {
+    for (int i = 0; i < length / 2; ++i) {
+        new_data[i] = data[i +]
+    }
 }
 
 // Brielle's code

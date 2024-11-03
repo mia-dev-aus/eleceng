@@ -36,9 +36,10 @@ constexpr int mic_radius_mil{};
 constexpr int sound_speed{343};
 
 // Filter
-// #define FILTER_ORDER 4
-// #define SCALE_FACTOR
-// constexpr int data_length = 9600;
-// constexpr int64_t a[FILTER_ORDER] = {};
+constexpr int ff_forder{2};
+constexpr int fb_forder{2};
+constexpr int data_length = 200;
+constexpr int32_t num_co[ff_forder] = {};
+constexpr int32_t den_co[fb_forder] = {};
 
 #endif

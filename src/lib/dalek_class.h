@@ -11,6 +11,8 @@ class Dalek {
 	bool right{false};
 	// Might be unnecessary.
 	bool straight{false};
+	int ir_data[num_ir_sensors][data_length];
+	int filter_data[num_ir_sensors][data_length / 2];
 
 	public:
 	// Contains the intensity of the signal detected from each ir sensor.
@@ -34,8 +36,8 @@ class Dalek {
 	void mic_setup();
 	// Gets the sensor data from IR sensors.
 	uint32_t update_ir_data();
-	// Filters the signal from the IR sensors.
-	void applyIIRFilter(int32_t *data, int length, int64_t *a, int64_t *b, int64_t *outputArray);
+	// Part of IR filter. 
+	void Dalek::apply_sub_filter(int32_t *data, int length, int32_t *new_data);
 	// Updates led output depending on direction.
 	uint32_t update_leds();
 	// updates the time record of each microphone.
