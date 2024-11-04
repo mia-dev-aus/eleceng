@@ -22,10 +22,11 @@ constexpr int SensorDisplacement[numIrSensors] = {};
 constexpr int muxPin0{2};
 
 // Service times
-constexpr int numServices{2};
+constexpr int numServices{3};
 constexpr int updateIrDataTime{200};
 constexpr int updateLedsTime{200};
 constexpr int updateSoundDataTime{200};
+constexpr int driveMotorTime{200};
 
 // Microphone 
 constexpr int micMidPin{5};
@@ -38,10 +39,17 @@ constexpr int micRadiusMil{};
 constexpr int soundSpeed{343};
 
 // Filter
-constexpr int ffForder{1};
-constexpr int fbForder{2};
+constexpr int filterOrder{3};
 constexpr int dataLength = 200;
-constexpr int32_t numCo[ffForder] = {};
-constexpr int32_t denCo[fbForder] = {};
+
+// Motor and exterminate
+constexpr int voltagePin = A0;
+constexpr int exterPin = A1;
+constexpr int clockwisePin = 9;
+constexpr int counterclockwisePin = 10;
+constexpr int speedPin = 11;  
+constexpr int exterminatePin = 8;
+int speed;
+
 
 #endif

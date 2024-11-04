@@ -12,6 +12,8 @@ void setup() {
 	dalek.ledSetup();
 	// dalek.mic_setup();
 	muxSetup();
+	dalek.motorSetup();
+	dalek.exterminateSetup();
 }
 
 void loop() {
@@ -39,7 +41,11 @@ void loop() {
 			case 1:
 				serviceTimes[service] += dalek.updateLeds();
 				break;
-			}
+			case 2: 
+				serviceTimes[service] += dalek.driveMotor();
+				break;
+			} 
+
 		}
 		nextTime = (serviceTimes[service] + currTime < nextTime) ? serviceTimes[service] + currTime : nextTime;		
 	}

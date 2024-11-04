@@ -2,6 +2,9 @@
 #include "dalek_class.h"
 #include "mux.h"
 #include <Arduino.h>
+#include <Filters.h>
+#include <AH/Timing/MillisMicrosTimer.hpp>
+#include <Filters/Butterworth.hpp>
 
 void Dalek::turnLeft() {
     left = true;
@@ -49,6 +52,70 @@ uint32_t Dalek::updateIrData() {
     return updateIrDataTime;
 }
 
+void Dalek::motorSetup() {
+    pinMode(clockwisePin, OUTPUT);
+    pinMode(counterclockwisePin, OUTPUT);
+    pinMode(speedPin, OUTPUT);
+}
+
+void Dalek::exterminateSetup() {
+    pinMode(exterminatePin, OUTPUT);
+}
+
+uint32_t Dalek::driveMotor() {
+  int analogValue = analogRead(voltagePin);
+  float voltage = analogValue * (5.0 / 1023.0); 
+
+  int exterValue = analogRead(exterPin);
+  float exterVolt = exterValue * (5.0 / 1023.0);
+
+  if (exterVolt >= 3) {
+    speed = 0;
+    analogWrite(speedPin, speed);  
+    digitalWrite(clockwisePin, LOW);
+    digitalWrite(counterclockwisePin, LOW);
+    digitalWrite(exterminatePin, HIGH);
+    Serial.println("Exterminate!");
+  } 
+
+  else if (voltage > 1.1) {  
+    speed = map(voltage * 100, 110, 200, 0, 255);
+    analogWrite(speedPin, speed);
+    digitalWrite(clockwisePin, HIGH);
+    digitalWrite(counterclockwisePin, LOW);
+    digitalWrite(exterminatePin, LOW);
+    Serial.print("Voltage: ");
+    Serial.print(voltage);
+    Serial.print(" V, Motor Speed: ");
+    Serial.println(speed);
+  } 
+  else if (voltage <= 0.9) {  
+    speed = map(voltage * 100, 0, 90, 255, 0);
+    analogWrite(speedPin, speed);
+    digitalWrite(clockwisePin, LOW);
+    digitalWrite(counterclockwisePin, HIGH);
+    digitalWrite(exterminatePin, LOW);
+    Serial.print("Voltage: ");
+    Serial.print(voltage);
+    Serial.print(" V, Motor Speed: ");
+    Serial.println(speed);
+  } 
+  else {
+    speed = 0;
+    analogWrite(speedPin, speed);
+    digitalWrite(clockwisePin, LOW);
+    digitalWrite(counterclockwisePin, LOW);
+    digitalWrite(exterminatePin, LOW);
+    Serial.println("Motor Stopped: Voltage below range.");
+  }
+
+  return driveMotorTime;
+}
+
+void Dalek::setupButterworth() {
+    butter<filterOrder>()
+}
+
 void Dalek::applySubFilter() {
     for (int i = 0; i < dataLength; ++i) {
         newData[i / dataLength] = data[i + 1] - data[i];
@@ -56,7 +123,7 @@ void Dalek::applySubFilter() {
 }
 
 void Dalek::applyIirFilter() {
-    
+
         
 }
 

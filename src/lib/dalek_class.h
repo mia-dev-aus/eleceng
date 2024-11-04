@@ -37,6 +37,10 @@ class Dalek {
 	// Gets the sensor data from IR sensors.
 	uint32_t updateIrData();
 	// IR filters. 
+	void Dalek::motorSetup();
+	void Dalek::exterminateSetup();
+	uint32_t Dalek::driveMotor();
+
 	void Dalek::applySubFilter();
 	void Dalek::applyIirFilter();
 	// Updates led output depending on direction.
