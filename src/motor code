@@ -1,0 +1,76 @@
+
+const int exter = A0;
+const int motor = A1;
+const int enA = 11;
+const int in1 = 10;
+const int in2 = 9;
+const int alarm = 12;
+int analogValue;
+float exterValue;
+float motorValue;
+int speed;
+
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(enA, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(alarm, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  analogValue = analogRead(exter);
+  exterValue = analogValue * (5.0 / 1023.0);
+
+  analogValue = analogRead(motor);
+  motorValue = analogValue * (5.0 / 1023.0);
+  Serial.println(motorValue);
+
+  if (exterValue >= 3.0) {
+
+    digitalWrite(alarm, HIGH);
+
+    Serial.println("exterminate");
+
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, LOW);
+
+  } else {
+    // turn off exterminate alarm 
+    digitalWrite(alarm, LOW);
+
+    if (motorValue > 1.1) {
+    
+      speed = map(motorValue * 100, 100, 200, 0, 255);
+
+      analogWrite(enA, speed); 
+      digitalWrite(in1, HIGH);
+      digitalWrite(in2, LOW);
+
+      Serial.println("clockwise");
+
+    } else if (motorValue < 0.9 ) {
+      
+      speed = map(motorValue * 100, 0, 100, 255, 0);
+      
+      analogWrite(enA, speed); 
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, HIGH);
+
+      Serial.println("anti");
+
+    } else if (motorValue >= 0.9 && motorValue <= 1.1) {
+      Serial.println("motor stop");
+
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, LOW);
+
+    }
+  }
+
+  delay(900); 
+
+}
