@@ -4,15 +4,15 @@
 
 // The analog pins will be labelled from right to left, 0 - 8.
 
-void mux_setup() {
-    for (int i = 0; i < num_ir_sensors; ++i) {
-        pinMode(mux_pin0 + i, OUTPUT);
+void muxSetup() {
+    for (int i = 0; i < numIrSensors; ++i) {
+        pinMode(muxPin0 + i, OUTPUT);
     }
 }
 
-int read_mux_analog_pin(int pin) {
-    reset_mux_pins();
-    digitalWrite(mux_pin0 + pin, HIGH);
+int readMuxAnalogPin(int pin) {
+    resetMuxPins();
+    digitalWrite(muxPin0 + pin, HIGH);
 
     if (pin >= 0 && pin <= 2) {
         return analogRead(MUX_SIGNAL_PIN1);
@@ -26,8 +26,8 @@ int read_mux_analog_pin(int pin) {
 
 };
 
-void reset_mux_pins() {
-    for (int i = 0; i < num_ir_sensors; ++i) {
-        digitalWrite(mux_pin0 + i, LOW);
+void resetMuxPins() {
+    for (int i = 0; i < numIrSensors; ++i) {
+        digitalWrite(muxPin0 + i, LOW);
     }
 }

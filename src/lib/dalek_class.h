@@ -11,13 +11,13 @@ class Dalek {
 	bool right{false};
 	// Might be unnecessary.
 	bool straight{false};
-	int ir_data[num_ir_sensors][data_length];
-	int filter_data[num_ir_sensors][data_length / 2];
+	int irData[numIrSensors][dataLength];
+	int filter_data[fbForder + ffForder][numIrSensors][dataLength / 2];
 
 	public:
 	// Contains the intensity of the signal detected from each ir sensor.
 	// int ir_sensors[num_ir_sensors][data_length]{};
-	int ir_sensors[num_ir_sensors]{};
+	int irSensors[numIrSensors]{};
 
 	// Contains the time record of each microphone
 	struct {
@@ -26,22 +26,23 @@ class Dalek {
 		uint32_t right;
 	} microphones;
 
-    void turn_left();
-    void turn_right();
+    void turnLeft();
+    void turnRight();
     void stop();
 
 	// Sets up the Digital pins for LED output.
-	void led_setup();
+	void ledSetup();
 	// Sets up Digital pins for reading microphones
-	void mic_setup();
+	void micSetup();
 	// Gets the sensor data from IR sensors.
-	uint32_t update_ir_data();
-	// Part of IR filter. 
-	void Dalek::apply_sub_filter(int32_t *data, int length, int32_t *new_data);
+	uint32_t updateIrData();
+	// IR filters. 
+	void Dalek::applySubFilter();
+	void Dalek::applyIirFilter();
 	// Updates led output depending on direction.
-	uint32_t update_leds();
+	uint32_t updateLeds();
 	// updates the time record of each microphone.
-	uint32_t update_sound_data();
+	uint32_t updateSoundData();
 };
 
 #endif

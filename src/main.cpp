@@ -5,58 +5,58 @@
 #include "lib/constants.h"
 
 Dalek dalek{};
-void change_dir();
+void changeDir();
 
 void setup() {
 	Serial.begin(9600);
-	dalek.led_setup();
-	dalek.mic_setup();
-	mux_setup();
+	dalek.ledSetup();
+	// dalek.mic_setup();
+	muxSetup();
 }
 
 void loop() {
-	uint32_t service_times[num_services] = {0};
-	uint32_t curr_time = millis();
+	uint32_t serviceTimes[numServices] = {0};
+	uint32_t currTime = millis();
 	// Max time before next service executes.
-	uint32_t next_time = curr_time + max_time_delay_ms;
+	uint32_t nextTime = currTime + maxTimeDelayMs;
 
 	// Look at service manager example in lectures slides for detail
-	for (int service = 0; service < num_services; ++service) {
-		if (service_times[service] <= curr_time) {
+	for (int service = 0; service < numServices; ++service) {
+		if (serviceTimes[service] <= currTime) {
 			// In order of service occuring
 			switch (service) {
 			case 0:
 				// debugging
-				for (int i = 0; i < num_ir_sensors; ++i) {
-					Serial.print(dalek.ir_sensors[i]);
+				for (int i = 0; i < numIrSensors; ++i) {
+					Serial.print(dalek.irSensors[i]);
 					Serial.print(' ');
 				}
 				Serial.print('\n');
 
-				service_times[service] += dalek.update_ir_data();
-				change_dir();
+				serviceTimes[service] += dalek.updateIrData();
+				changeDir();
 				break;
 			case 1:
-				service_times[service] += dalek.update_leds();
+				serviceTimes[service] += dalek.updateLeds();
 				break;
 			}
 		}
-		next_time = (service_times[service] + curr_time < next_time) ? service_times[service] + curr_time : next_time;		
+		nextTime = (serviceTimes[service] + currTime < nextTime) ? serviceTimes[service] + currTime : nextTime;		
 	}
-	delay((next_time > curr_time) ? next_time - curr_time : 0);
+	delay((nextTime > currTime) ? nextTime - currTime : 0);
 }
 
 // Helper function for main
-void change_dir() {
+void changeDir() {
 	// Index of sensor facing the pluger direction.
-	int mid_sensor{get_mid_index(num_ir_sensors)};
+	int midSensor{getMidIndex(numIrSensors)};
 	// Sensor detecting max intensity.
-	int max_sensor{get_max_index(dalek.ir_sensors, num_ir_sensors)};
+	int maxSensor{getMaxIndex(dalek.irSensors, numIrSensors)};
 
-	if (max_sensor < mid_sensor) {
-		dalek.turn_left();
-	} else if (max_sensor > mid_sensor) {
-		dalek.turn_right();
+	if (maxSensor < midSensor) {
+		dalek.turnLeft();
+	} else if (maxSensor > midSensor) {
+		dalek.turnRight();
 	} else {
 		dalek.stop();
 	}

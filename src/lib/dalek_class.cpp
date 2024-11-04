@@ -3,13 +3,13 @@
 #include "mux.h"
 #include <Arduino.h>
 
-void Dalek::turn_left() {
+void Dalek::turnLeft() {
     left = true;
     right = false;
     straight = false;
 }
 
-void Dalek::turn_right() {
+void Dalek::turnRight() {
     left = false;
     right = true;
     straight = false;
@@ -21,87 +21,83 @@ void Dalek::stop() {
     straight = true;
 }
 
-void Dalek::led_setup() {
-    pinMode(left_led, OUTPUT);
-	pinMode(mid_led, OUTPUT);
-	pinMode(right_led, OUTPUT);
+void Dalek::ledSetup() {
+    pinMode(leftLed, OUTPUT);
+	pinMode(midLed, OUTPUT);
+	pinMode(rightLed, OUTPUT);
 }
 
-void Dalek::mic_setup() {
-    pinMode(mic_mid_pin, INPUT);
-	pinMode(mic_left_pin, INPUT);
-	pinMode(mic_right_pin, INPUT);
+void Dalek::micSetup() {
+    pinMode(micMidPin, INPUT);
+	pinMode(micLeftPin, INPUT);
+	pinMode(micRightPin, INPUT);
 }
 
-uint32_t Dalek::update_ir_data() {
-    for (int i{0}; i < num_ir_sensors; ++i) {
-        for (int j{0}; j < data_length; ++j) {
-            ir_data[i][j] = read_mux_analog_pin(i);
+uint32_t Dalek::updateIrData() {
+    for (int i{0}; i < numIrSensors; ++i) {
+        for (int j{0}; j < dataLength; ++j) {
+            irData[i][j] = readMuxAnalogPin(i);
         }
     }
-    return update_ir_data_time;
+    applySubFilter();
+    applyIirFilter(); 
+    
+    for (int i = 0; i < numIrSensors; ++i) {
+        irSensors[i] = getAverage(filterData, dataLength / 2);
+    }
+
+    return updateIrDataTime;
 }
 
-void Dalek::apply_sub_filter(int32_t *data, int length, int32_t *new_data) {
-    for (int i = 0; i < length / 2; ++i) {
-        new_data[i] = data[i +]
+void Dalek::applySubFilter() {
+    for (int i = 0; i < dataLength; ++i) {
+        newData[i / dataLength] = data[i + 1] - data[i];
     }
 }
 
-// Brielle's code
-// void Dalek::applyIIRFilter(int32_t *data, int length, int64_t *a, int64_t *b, int64_t *outputArray) {
-//  int order = FILTER_ORDER;
-//  int64_t x[FILTER_ORDER + 1] = {0};
-//  int64_t y[FILTER_ORDER + 1] = {0};
-//  for (int n = 0; n < length; n++) {
-//  for (int i = order; i > 0; i--) {
-//  x[i] = x[i - 1];
-//  }
-//  x[0] = (int64_t)data[n] * SCALE_FACTOR;
-//  int64_t filteredValue = 0;
-//  for (int i = 0; i <= order; i++) {
-//  filteredValue += b[i] * x[i];
-//  }
-//  for (int i = 1; i <= order; i++) {
-//  filteredValue -= a[i] * y[i - 1];
-//  }
-//  for (int i = order - 1; i > 0; i--) {
-//  y[i] = y[i - 1];
-//  }
-//  y[0] = filteredValue / SCALE_FACTOR;
-//  outputArray[n] = filteredValue / SCALE_FACTOR;
-//  }
-// }
-
-uint32_t Dalek::update_leds() {
-    if (left) {
-		digitalWrite(left_led, HIGH);
-		digitalWrite(right_led, LOW);
-		digitalWrite(mid_led, LOW);
-	} else if (right) {
-		digitalWrite(left_led, LOW);
-		digitalWrite(right_led, HIGH);
-		digitalWrite(mid_led, LOW);
-	} else {
-		digitalWrite(left_led, LOW);
-		digitalWrite(right_led, LOW);
-		digitalWrite(mid_led, HIGH);
-	}
-
-    return update_leds_time;
+void Dalek::applyIirFilter() {
+    
+        
 }
 
-uint32_t Dalek::update_sound_data() {
+uint32_t Dalek::getAverage(int32_t *data, int dataLength) {
+    int64_t sum = 0;
+    for (int i = 0; i < dataLength; ++i) {
+        sum += data[i];
+    }
+
+    return sum / dataLength;
+}
+
+uint32_t Dalek::updateLeds() {
+    if (left) {
+		digitalWrite(leftLed, HIGH);
+		digitalWrite(rightLed, LOW);
+		digitalWrite(midLed, LOW);
+	} else if (right) {
+		digitalWrite(leftLed, LOW);
+		digitalWrite(rightLed, HIGH);
+		digitalWrite(midLed, LOW);
+	} else {
+		digitalWrite(leftLed, LOW);
+		digitalWrite(rightLed, LOW);
+		digitalWrite(midLed, HIGH);
+	}
+
+    return updateLedsTime;
+}
+
+uint32_t Dalek::updateSoundData() {
     microphones.left = 0;
     microphones.mid = 0;
     microphones.right = 0;
-    uint32_t curr_time = millis();
+    uint32_t currTime = millis();
 
-    while (millis() - curr_time < max_wait) {
-        microphones.left = (digitalRead(mic_mid_pin) && !microphones.left) ? micros() : 0;
-        microphones.mid = (digitalRead(mic_left_pin) && !microphones.mid) ? micros() : 0;
-        microphones.right = (digitalRead(mic_right_pin) && !microphones.right) ? micros() : 0;
+    while (millis() - currTime < maxWait) {
+        microphones.left = (digitalRead(micMidPin) && !microphones.left) ? micros() : 0;
+        microphones.mid = (digitalRead(micLeftPin) && !microphones.mid) ? micros() : 0;
+        microphones.right = (digitalRead(micRightPin) && !microphones.right) ? micros() : 0;
     }
 
-    return update_sound_data_time;
+    return updateSoundDataTime;
 }
