@@ -1,4 +1,5 @@
 #include "array.h"
+#include <stdint.h>
 
 // Finds the index of the element in an array with the greatest value.
 int getMaxIndex(int array[], int length) {
@@ -30,4 +31,13 @@ int getMaxIndex(int array[], int length) {
 
 int getMidIndex(int length) {
     return length / 2 - 1 + (length % 2);
+}
+
+int getAverage(int *data, int dataLength) {
+    int64_t sum = 0;
+    for (int i = 0; i < dataLength; ++i) {
+        sum += data[i];
+    }
+
+    return sum / dataLength;
 }

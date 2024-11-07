@@ -1,6 +1,7 @@
 #include "constants.h"
 #include "dalek_class.h"
 #include "mux.h"
+#include "array.h"
 #include <Arduino.h>
 #include <Filters.h>
 #include <AH/Timing/MillisMicrosTimer.hpp>
@@ -24,117 +25,123 @@ void Dalek::stop() {
     straight = true;
 }
 
+void Dalek::exterminate() {
+    exterminating = true;
+}
+
+void Dalek::stopExterminate() {
+    exterminating = false;
+}
+
+bool Dalek::isNotTurning() {
+    if (right == false && left == false) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void Dalek::ledSetup() {
     pinMode(leftLed, OUTPUT);
 	pinMode(midLed, OUTPUT);
 	pinMode(rightLed, OUTPUT);
 }
 
-void Dalek::micSetup() {
-    pinMode(micMidPin, INPUT);
-	pinMode(micLeftPin, INPUT);
-	pinMode(micRightPin, INPUT);
-}
-
 uint32_t Dalek::updateIrData() {
     for (int i{0}; i < numIrSensors; ++i) {
         for (int j{0}; j < dataLength; ++j) {
-            irData[i][j] = readMuxAnalogPin(i);
+            irData[j] = readMuxAnalogPin(i);
         }
-    }
-    applySubFilter();
-    applyIirFilter(); 
-    
-    for (int i = 0; i < numIrSensors; ++i) {
+
+        applySubFilter();
+
         irSensors[i] = getAverage(filterData, dataLength / 2);
+
+        // applyMovingAverage();
     }
 
     return updateIrDataTime;
 }
 
 void Dalek::motorSetup() {
-    pinMode(clockwisePin, OUTPUT);
-    pinMode(counterclockwisePin, OUTPUT);
-    pinMode(speedPin, OUTPUT);
+    pinMode(in1, OUTPUT);
+    pinMode(in2, OUTPUT);
+    pinMode(enA, OUTPUT);
 }
 
 void Dalek::exterminateSetup() {
-    pinMode(exterminatePin, OUTPUT);
+    pinMode(alarm, OUTPUT);
+}
+
+float Dalek::getRotSpeed() {
+    return speedCo * SensorDisplacement[getMaxIndex(irSensors, numIrSensors)];
 }
 
 uint32_t Dalek::driveMotor() {
-  int analogValue = analogRead(voltagePin);
-  float voltage = analogValue * (5.0 / 1023.0); 
+  float motorValue = getRotSpeed() * (5.0 / 1023.0);
+  Serial.println(motorValue);
 
-  int exterValue = analogRead(exterPin);
-  float exterVolt = exterValue * (5.0 / 1023.0);
+    // turn off exterminate alarm 
+    if (right == true) {
+    
+      int speed = map(motorValue * 100, 100, 200, 0, 255);
 
-  if (exterVolt >= 3) {
-    speed = 0;
-    analogWrite(speedPin, speed);  
-    digitalWrite(clockwisePin, LOW);
-    digitalWrite(counterclockwisePin, LOW);
-    digitalWrite(exterminatePin, HIGH);
-    Serial.println("Exterminate!");
-  } 
+      analogWrite(enA, speed); 
+      digitalWrite(in1, HIGH);
+      digitalWrite(in2, LOW);
 
-  else if (voltage > 1.1) {  
-    speed = map(voltage * 100, 110, 200, 0, 255);
-    analogWrite(speedPin, speed);
-    digitalWrite(clockwisePin, HIGH);
-    digitalWrite(counterclockwisePin, LOW);
-    digitalWrite(exterminatePin, LOW);
-    Serial.print("Voltage: ");
-    Serial.print(voltage);
-    Serial.print(" V, Motor Speed: ");
-    Serial.println(speed);
-  } 
-  else if (voltage <= 0.9) {  
-    speed = map(voltage * 100, 0, 90, 255, 0);
-    analogWrite(speedPin, speed);
-    digitalWrite(clockwisePin, LOW);
-    digitalWrite(counterclockwisePin, HIGH);
-    digitalWrite(exterminatePin, LOW);
-    Serial.print("Voltage: ");
-    Serial.print(voltage);
-    Serial.print(" V, Motor Speed: ");
-    Serial.println(speed);
-  } 
-  else {
-    speed = 0;
-    analogWrite(speedPin, speed);
-    digitalWrite(clockwisePin, LOW);
-    digitalWrite(counterclockwisePin, LOW);
-    digitalWrite(exterminatePin, LOW);
-    Serial.println("Motor Stopped: Voltage below range.");
-  }
+      Serial.println("clockwise");
 
-  return driveMotorTime;
+    } else if (left == true) {
+      
+      int speed = map(motorValue * 100, 0, 100, 255, 0);
+      
+      analogWrite(enA, speed); 
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, HIGH);
+
+      Serial.println("anti");
+
+    } else if (left == false && right == false) {
+      Serial.println("motor stop");
+
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, LOW);  
+
+    }
+
+    return driveMotorTime;
 }
 
-void Dalek::setupButterworth() {
-    butter<filterOrder>()
+uint32_t Dalek::executeExterminate() {
+    if (exterminating) {
+        digitalWrite(alarm, HIGH);
+
+        Serial.println("exterminate");
+
+        digitalWrite(in1, LOW);
+        digitalWrite(in2, LOW);
+    } else {
+        digitalWrite(alarm, LOW);
+    }
+
+    return executeExterminateTime;
 }
+
+// void Dalek::setupButterworth() {
+//     butter<filterOrder>()
+// }
 
 void Dalek::applySubFilter() {
-    for (int i = 0; i < dataLength; ++i) {
-        newData[i / dataLength] = data[i + 1] - data[i];
+    for (int i = 0; i < dataLength / 2; ++i) {
+        filterData[i] = irData[2 * i + 1] - irData[2* i];
     }
 }
 
-void Dalek::applyIirFilter() {
+// void Dalek::applyIirFilter() {
 
         
-}
-
-uint32_t Dalek::getAverage(int32_t *data, int dataLength) {
-    int64_t sum = 0;
-    for (int i = 0; i < dataLength; ++i) {
-        sum += data[i];
-    }
-
-    return sum / dataLength;
-}
+// }
 
 uint32_t Dalek::updateLeds() {
     if (left) {
@@ -154,6 +161,7 @@ uint32_t Dalek::updateLeds() {
     return updateLedsTime;
 }
 
+#ifdef MIC_FUNC_ON
 uint32_t Dalek::updateSoundData() {
     microphones.left = 0;
     microphones.mid = 0;
@@ -168,3 +176,11 @@ uint32_t Dalek::updateSoundData() {
 
     return updateSoundDataTime;
 }
+
+
+void Dalek::micSetup() {
+    pinMode(micMidPin, INPUT);
+	pinMode(micLeftPin, INPUT);
+	pinMode(micRightPin, INPUT);
+}
+#endif

@@ -5,16 +5,23 @@
 #include "lib/constants.h"
 
 Dalek dalek{};
-void changeDir();
+void changeDir(uint32_t currTime);
+void updateExterminate(uint32_t currTime);
 
 void setup() {
 	Serial.begin(9600);
 	dalek.ledSetup();
-	// dalek.mic_setup();
 	muxSetup();
 	dalek.motorSetup();
 	dalek.exterminateSetup();
+
+	#ifdef MIC_FUNC_ON
+	dalek.mic_setup();
+	#endif
 }
+
+// records timestamp of last time the dalek was not moving left or right.
+uint32_t lastTurn = 0;
 
 void loop() {
 	uint32_t serviceTimes[numServices] = {0};
@@ -22,7 +29,7 @@ void loop() {
 	// Max time before next service executes.
 	uint32_t nextTime = currTime + maxTimeDelayMs;
 
-	// Look at service manager example in lectures slides for detail
+	// Look at service manager example in lectures slides for detail.
 	for (int service = 0; service < numServices; ++service) {
 		if (serviceTimes[service] <= currTime) {
 			// In order of service occuring
@@ -36,7 +43,8 @@ void loop() {
 				Serial.print('\n');
 
 				serviceTimes[service] += dalek.updateIrData();
-				changeDir();
+				changeDir(currTime);
+
 				break;
 			case 1:
 				serviceTimes[service] += dalek.updateLeds();
@@ -44,6 +52,9 @@ void loop() {
 			case 2: 
 				serviceTimes[service] += dalek.driveMotor();
 				break;
+			case 3: 
+				updateExterminate(currTime);
+				serviceTimes[service] += dalek.executeExterminate();
 			} 
 
 		}
@@ -53,43 +64,59 @@ void loop() {
 }
 
 // Helper function for main
-void changeDir() {
+void changeDir(uint32_t currTime) {
 	// Index of sensor facing the pluger direction.
 	int midSensor{getMidIndex(numIrSensors)};
 	// Sensor detecting max intensity.
 	int maxSensor{getMaxIndex(dalek.irSensors, numIrSensors)};
 
+	if (maxSensor < minSensorValue) {
+		return;
+	} 
+
 	if (maxSensor < midSensor) {
 		dalek.turnLeft();
+		lastTurn = currTime;
 	} else if (maxSensor > midSensor) {
 		dalek.turnRight();
+		lastTurn = currTime;
 	} else {
 		dalek.stop();
 	}
-
 }
 
-// double calc_pol_dir() {
-// 	uint32_t time_diff1 = dalek.microphones.mid - dalek.microphones.mid;
-// 	uint32_t time_diff2 = dalek.microphones.mid - dalek.microphones.right;
-// 	uint32_t time_diff3 = dalek.microphones.left - dalek.microphones.right;
+// Stops extermination after the dalek starts turning again.
+void updateExterminate(uint32_t currTime) {
+	if (currTime - lastTurn > 1000) {
+		dalek.exterminate();
+	} else {
+		dalek.stopExterminate();
+	}
+}
 
-// 	double radius = mic_radius_mil * 1000;
+#ifdef MIC_FUNC_ON
+double calc_pol_dir() {
+	uint32_t time_diff1 = dalek.microphones.mid - dalek.microphones.mid;
+	uint32_t time_diff2 = dalek.microphones.mid - dalek.microphones.right;
+	uint32_t time_diff3 = dalek.microphones.left - dalek.microphones.right;
 
-// 	double x{(time_diff3 * sound_speed * 1.0) / (2 *sqrt(3.0) * radius)};
-// 	double y{(time_diff2 * sound_speed * 1.0 - x*radius*sqrt(3.0) / (sound_speed * 1.0)) * (sound_speed*1.0/(-3*radius*1.0))};
+	double radius = mic_radius_mil * 1000;
 
-// 	if (x > 0.0 && y > 0.0) {
-// 		// First quad
-// 		return atan(y/x);
-// 	} else if (x < 0.0 && y > 0.0) {
-// 		// Second quad
-// 		return PI + atan(y/x);
-// 	} else if (x < 0.0 && y < 0.0) {
-// 		// Third quad
-// 		return PI + atan(y/x);
-// 	} else {
-// 		// Fourth quad
-// 		return atan(y/x);
-// 	}
-// }
+	double x{(time_diff3 * sound_speed * 1.0) / (2 *sqrt(3.0) * radius)};
+	double y{(time_diff2 * sound_speed * 1.0 - x*radius*sqrt(3.0) / (sound_speed * 1.0)) * (sound_speed*1.0/(-3*radius*1.0))};
+
+	if (x > 0.0 && y > 0.0) {
+		// First quad
+		return atan(y/x);
+	} else if (x < 0.0 && y > 0.0) {
+		// Second quad
+		return PI + atan(y/x);
+	} else if (x < 0.0 && y < 0.0) {
+		// Third quad
+		return PI + atan(y/x);
+	} else {
+		// Fourth quad
+		return atan(y/x);
+	}
+}
+#endif

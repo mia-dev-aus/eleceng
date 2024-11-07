@@ -3,5 +3,6 @@
 
 int getMaxIndex(int array[], int length);
 int getMidIndex(int length);
+int getAverage(int *data, int dataLength);
 
 #endif

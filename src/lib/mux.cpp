@@ -14,16 +14,7 @@ int readMuxAnalogPin(int pin) {
     resetMuxPins();
     digitalWrite(muxPin0 + pin, HIGH);
 
-    if (pin >= 0 && pin <= 2) {
-        return analogRead(MUX_SIGNAL_PIN1);
-    } else if (pin >= 3 && pin <= 5) {
-        return analogRead(MUX_SIGNAL_PIN2);
-
-    } else if (pin >= 6 && pin <= 8) {
-        return analogRead(MUX_SIGNAL_PIN3);
-
-    }
-
+    return analogRead(MUX_SIGNAL_PIN1);
 };
 
 void resetMuxPins() {
