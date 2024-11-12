@@ -70,7 +70,7 @@ void changeDir(uint32_t currTime) {
 	// Sensor detecting max intensity.
 	int maxSensor{getMaxIndex(dalek.irSensors, numIrSensors)};
 
-	if (maxSensor < minSensorValue) {
+	if (dalek.irSensors[maxSensor] < minSensorValue) {
 		return;
 	} 
 

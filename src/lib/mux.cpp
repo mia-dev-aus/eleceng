@@ -14,7 +14,7 @@ int readMuxAnalogPin(int pin) {
     resetMuxPins();
     digitalWrite(muxPin0 + pin, HIGH);
 
-    return analogRead(MUX_SIGNAL_PIN1);
+    return analogRead(A0);
 };
 
 void resetMuxPins() {

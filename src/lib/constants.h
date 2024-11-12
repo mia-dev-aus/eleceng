@@ -16,7 +16,6 @@ constexpr int minSensorValue{20};
 constexpr int SensorDisplacement[numIrSensors] = {115,80,45,10,0,10,45,90,115};
 
 // Mux pins. From 0 - 8. E.G. mux_pin4 = mix_pin0 + 4
-#define MUX_SIGNAL_PIN1 A0
 constexpr int muxPin0{2};
 
 // Service times

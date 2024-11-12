@@ -49,13 +49,15 @@ void Dalek::ledSetup() {
 
 uint32_t Dalek::updateIrData() {
     for (int i{0}; i < numIrSensors; ++i) {
-        for (int j{0}; j < dataLength; ++j) {
-            irData[j] = readMuxAnalogPin(i);
-        }
+        irSensors[i] = readMuxAnalogPin(i);
+        // for (int j{0}; j < dataLength; ++j) {
+        //     irData[j] = readMuxAnalogPin(i);
+        //     delayMicroseconds(29);
+        // }
 
-        applySubFilter();
+        // applySubFilter();
 
-        irSensors[i] = getAverage(filterData, dataLength / 2);
+        // irSensors[i] = getAverage(filterData, dataLength / 2);
 
         // applyMovingAverage();
     }
@@ -134,7 +136,7 @@ uint32_t Dalek::executeExterminate() {
 
 void Dalek::applySubFilter() {
     for (int i = 0; i < dataLength / 2; ++i) {
-        filterData[i] = irData[2 * i + 1] - irData[2* i];
+        filterData[i] = abs(irData[2 * i + 1] - irData[2* i]);
     }
 }
 
@@ -148,14 +150,17 @@ uint32_t Dalek::updateLeds() {
 		digitalWrite(leftLed, HIGH);
 		digitalWrite(rightLed, LOW);
 		digitalWrite(midLed, LOW);
+        Serial.println("left led");
 	} else if (right) {
 		digitalWrite(leftLed, LOW);
 		digitalWrite(rightLed, HIGH);
 		digitalWrite(midLed, LOW);
+        Serial.println("right led");
 	} else {
 		digitalWrite(leftLed, LOW);
 		digitalWrite(rightLed, LOW);
 		digitalWrite(midLed, HIGH);
+        Serial.println("mid led");
 	}
 
     return updateLedsTime;
