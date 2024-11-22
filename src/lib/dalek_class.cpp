@@ -82,7 +82,7 @@ float Dalek::getRotSpeed() {
     return speedCo * SensorDisplacement[getMaxIndex(irSensors, numIrSensors)];
 }
 
-
+// Derived from code provided by Terry and Caitlan.
 uint32_t Dalek::driveMotor() {
   float motorValue = getRotSpeed() * (5.0 / 1023.0);
   Serial.println(motorValue);
