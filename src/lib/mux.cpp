@@ -2,14 +2,14 @@
 #include "mux.h"
 #include <Arduino.h>
 
-// The analog pins will be labelled from right to left, 0 - 8.
-
 void muxSetup() {
     for (int i = 0; i < numIrSensors; ++i) {
         pinMode(muxPin0 + i, OUTPUT);
     }
 }
 
+// Reads the nth analog pin, where n is pin.
+// The analog pins are labelled from left to right, 0 - 8.
 int readMuxAnalogPin(int pin) {
     resetMuxPins();
     digitalWrite(muxPin0 + pin, HIGH);
@@ -17,6 +17,7 @@ int readMuxAnalogPin(int pin) {
     return analogRead(A0);
 };
 
+// Switches off mux pins.
 void resetMuxPins() {
     for (int i = 0; i < numIrSensors; ++i) {
         digitalWrite(muxPin0 + i, LOW);

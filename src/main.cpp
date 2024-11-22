@@ -29,7 +29,9 @@ void loop() {
 	// Max time before next service executes.
 	uint32_t nextTime = currTime + maxTimeDelayMs;
 
-	// Look at service manager example in lectures slides for detail.
+	// Executes Dalek instruction evert n milliseconds, where n is specified in
+	// serviceTimes.
+	// Look at service manager example in lectures slides for more detail.
 	for (int service = 0; service < numServices; ++service) {
 		if (serviceTimes[service] <= currTime) {
 			// In order of service occuring
@@ -58,12 +60,13 @@ void loop() {
 			} 
 
 		}
-		nextTime = (serviceTimes[service] + currTime < nextTime) ? serviceTimes[service] + currTime : nextTime;		
+		nextTime = (serviceTimes[service] < nextTime) ? serviceTimes[service] : nextTime;		
 	}
 	delay((nextTime > currTime) ? nextTime - currTime : 0);
 }
 
 // Helper function for main
+// Changes the Daleks action depending on the Ir data in dalek.irSensors.
 void changeDir(uint32_t currTime) {
 	// Index of sensor facing the pluger direction.
 	int midSensor{getMidIndex(numIrSensors)};

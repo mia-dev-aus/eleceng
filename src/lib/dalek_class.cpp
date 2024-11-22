@@ -33,6 +33,7 @@ void Dalek::stopExterminate() {
     exterminating = false;
 }
 
+// Returns true if the dalek is not turning, otherwise returns false.
 bool Dalek::isNotTurning() {
     if (right == false && left == false) {
         return true;
@@ -47,24 +48,6 @@ void Dalek::ledSetup() {
 	pinMode(rightLed, OUTPUT);
 }
 
-uint32_t Dalek::updateIrData() {
-    for (int i{0}; i < numIrSensors; ++i) {
-        irSensors[i] = readMuxAnalogPin(i);
-        // for (int j{0}; j < dataLength; ++j) {
-        //     irData[j] = readMuxAnalogPin(i);
-        //     delayMicroseconds(29);
-        // }
-
-        // applySubFilter();
-
-        // irSensors[i] = getAverage(filterData, dataLength / 2);
-
-        // applyMovingAverage();
-    }
-
-    return updateIrDataTime;
-}
-
 void Dalek::motorSetup() {
     pinMode(in1, OUTPUT);
     pinMode(in2, OUTPUT);
@@ -75,9 +58,30 @@ void Dalek::exterminateSetup() {
     pinMode(alarm, OUTPUT);
 }
 
+// Updates the daleks IR data. Applies filters to the sensor data to gather 
+// results.
+uint32_t Dalek::updateIrData() {
+    for (int i{0}; i < numIrSensors; ++i) {
+        // Debug
+        // irSensors[i] = readMuxAnalogPin(i);
+        for (int j{0}; j < dataLength; ++j) {
+            irData[j] = readMuxAnalogPin(i);
+            delayMicroseconds(29);
+        }
+
+        applySubFilter();
+
+        irSensors[i] = getAverage(filterData, dataLength / 2);
+    }
+
+    return updateIrDataTime;
+}
+
+// Returns the rotational speed the dalek should turn.
 float Dalek::getRotSpeed() {
     return speedCo * SensorDisplacement[getMaxIndex(irSensors, numIrSensors)];
 }
+
 
 uint32_t Dalek::driveMotor() {
   float motorValue = getRotSpeed() * (5.0 / 1023.0);
@@ -115,6 +119,7 @@ uint32_t Dalek::driveMotor() {
     return driveMotorTime;
 }
 
+// Executes the exterminate message if the dalek is ready to exterminate.
 uint32_t Dalek::executeExterminate() {
     if (exterminating) {
         digitalWrite(alarm, HIGH);
@@ -130,21 +135,15 @@ uint32_t Dalek::executeExterminate() {
     return executeExterminateTime;
 }
 
-// void Dalek::setupButterworth() {
-//     butter<filterOrder>()
-// }
-
+// Updates the filter data by the absolute value of the subtraction of 
+// consecutive datum from the ir data.
 void Dalek::applySubFilter() {
     for (int i = 0; i < dataLength / 2; ++i) {
         filterData[i] = abs(irData[2 * i + 1] - irData[2* i]);
     }
 }
 
-// void Dalek::applyIirFilter() {
-
-        
-// }
-
+// Updates the LEDs to reflect the direction of the dalek.
 uint32_t Dalek::updateLeds() {
     if (left) {
 		digitalWrite(leftLed, HIGH);
