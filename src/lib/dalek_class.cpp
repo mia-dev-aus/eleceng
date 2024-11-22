@@ -1,15 +1,19 @@
 #include "constants.h"
 #include "dalek_class.h"
 #include "mux.h"
+#include "array.h"
 #include <Arduino.h>
+#include <Filters.h>
+#include <AH/Timing/MillisMicrosTimer.hpp>
+#include <Filters/Butterworth.hpp>
 
-void Dalek::turn_left() {
+void Dalek::turnLeft() {
     left = true;
     right = false;
     straight = false;
 }
 
-void Dalek::turn_right() {
+void Dalek::turnRight() {
     left = false;
     right = true;
     straight = false;
@@ -21,55 +25,166 @@ void Dalek::stop() {
     straight = true;
 }
 
-void Dalek::led_setup() {
-    pinMode(left_led, OUTPUT);
-	pinMode(mid_led, OUTPUT);
-	pinMode(right_led, OUTPUT);
+void Dalek::exterminate() {
+    exterminating = true;
 }
 
-void Dalek::mic_setup() {
-    pinMode(mic_mid_pin, INPUT);
-	pinMode(mic_left_pin, INPUT);
-	pinMode(mic_right_pin, INPUT);
+void Dalek::stopExterminate() {
+    exterminating = false;
 }
 
-uint32_t Dalek::update_ir_data() {
-    for (int i{0}; i < num_ir_sensors; ++i) {
-        ir_sensors[i] = read_mux_analog_pin(i);
-        delay(time_delay_ms);
+// Returns true if the dalek is not turning, otherwise returns false.
+bool Dalek::isNotTurning() {
+    if (right == false && left == false) {
+        return true;
+    } else {
+        return false;
     }
-    return update_ir_data_time;
 }
 
-uint32_t Dalek::update_leds() {
+void Dalek::ledSetup() {
+    pinMode(leftLed, OUTPUT);
+	pinMode(midLed, OUTPUT);
+	pinMode(rightLed, OUTPUT);
+}
+
+void Dalek::motorSetup() {
+    pinMode(in1, OUTPUT);
+    pinMode(in2, OUTPUT);
+    pinMode(enA, OUTPUT);
+}
+
+void Dalek::exterminateSetup() {
+    pinMode(alarm, OUTPUT);
+}
+
+// Updates the daleks IR data. Applies filters to the sensor data to gather 
+// results.
+uint32_t Dalek::updateIrData() {
+    for (int i{0}; i < numIrSensors; ++i) {
+        // Debug
+        // irSensors[i] = readMuxAnalogPin(i);
+        for (int j{0}; j < dataLength; ++j) {
+            irData[j] = readMuxAnalogPin(i);
+            delayMicroseconds(29);
+        }
+
+        applySubFilter();
+
+        irSensors[i] = getAverage(filterData, dataLength / 2);
+    }
+
+    return updateIrDataTime;
+}
+
+// Returns the rotational speed the dalek should turn.
+float Dalek::getRotSpeed() {
+    return speedCo * SensorDisplacement[getMaxIndex(irSensors, numIrSensors)];
+}
+
+// Derived from code provided by Terry and Caitlan.
+uint32_t Dalek::driveMotor() {
+  float motorValue = getRotSpeed() * (5.0 / 1023.0);
+  Serial.println(motorValue);
+
+    // turn off exterminate alarm 
+    if (right == true) {
+    
+      int speed = map(motorValue * 100, 100, 200, 0, 255);
+
+      analogWrite(enA, speed); 
+      digitalWrite(in1, HIGH);
+      digitalWrite(in2, LOW);
+
+      Serial.println("clockwise");
+
+    } else if (left == true) {
+      
+      int speed = map(motorValue * 100, 0, 100, 255, 0);
+      
+      analogWrite(enA, speed); 
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, HIGH);
+
+      Serial.println("anti");
+
+    } else if (left == false && right == false) {
+      Serial.println("motor stop");
+
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, LOW);  
+
+    }
+
+    return driveMotorTime;
+}
+
+// Executes the exterminate message if the dalek is ready to exterminate.
+uint32_t Dalek::executeExterminate() {
+    if (exterminating) {
+        digitalWrite(alarm, HIGH);
+
+        Serial.println("exterminate");
+
+        digitalWrite(in1, LOW);
+        digitalWrite(in2, LOW);
+    } else {
+        digitalWrite(alarm, LOW);
+    }
+
+    return executeExterminateTime;
+}
+
+// Updates the filter data by the absolute value of the subtraction of 
+// consecutive datum from the ir data.
+void Dalek::applySubFilter() {
+    for (int i = 0; i < dataLength / 2; ++i) {
+        filterData[i] = abs(irData[2 * i + 1] - irData[2* i]);
+    }
+}
+
+// Updates the LEDs to reflect the direction of the dalek.
+uint32_t Dalek::updateLeds() {
     if (left) {
-		digitalWrite(left_led, HIGH);
-		digitalWrite(right_led, LOW);
-		digitalWrite(mid_led, LOW);
+		digitalWrite(leftLed, HIGH);
+		digitalWrite(rightLed, LOW);
+		digitalWrite(midLed, LOW);
+        Serial.println("left led");
 	} else if (right) {
-		digitalWrite(left_led, LOW);
-		digitalWrite(right_led, HIGH);
-		digitalWrite(mid_led, LOW);
+		digitalWrite(leftLed, LOW);
+		digitalWrite(rightLed, HIGH);
+		digitalWrite(midLed, LOW);
+        Serial.println("right led");
 	} else {
-		digitalWrite(left_led, LOW);
-		digitalWrite(right_led, LOW);
-		digitalWrite(mid_led, HIGH);
+		digitalWrite(leftLed, LOW);
+		digitalWrite(rightLed, LOW);
+		digitalWrite(midLed, HIGH);
+        Serial.println("mid led");
 	}
 
-    return update_leds_time;
+    return updateLedsTime;
 }
 
-uint32_t Dalek::update_sound_data() {
+#ifdef MIC_FUNC_ON
+uint32_t Dalek::updateSoundData() {
     microphones.left = 0;
     microphones.mid = 0;
     microphones.right = 0;
-    uint32_t curr_time = millis();
+    uint32_t currTime = millis();
 
-    while (millis() - curr_time < max_wait) {
-        microphones.left = (digitalRead(mic_mid_pin) && !microphones.left) ? micros() : 0;
-        microphones.mid = (digitalRead(mic_left_pin) && !microphones.mid) ? micros() : 0;
-        microphones.right = (digitalRead(mic_right_pin) && !microphones.right) ? micros() : 0;
+    while (millis() - currTime < maxWait) {
+        microphones.left = (digitalRead(micMidPin) && !microphones.left) ? micros() : 0;
+        microphones.mid = (digitalRead(micLeftPin) && !microphones.mid) ? micros() : 0;
+        microphones.right = (digitalRead(micRightPin) && !microphones.right) ? micros() : 0;
     }
 
-    return update_sound_data_time;
+    return updateSoundDataTime;
 }
+
+
+void Dalek::micSetup() {
+    pinMode(micMidPin, INPUT);
+	pinMode(micLeftPin, INPUT);
+	pinMode(micRightPin, INPUT);
+}
+#endif

@@ -2,41 +2,24 @@
 #include "mux.h"
 #include <Arduino.h>
 
-void mux_setup() {
-    pinMode(mux_pin0, OUTPUT);
-    pinMode(mux_pin1, OUTPUT);
-    pinMode(mux_pin2, OUTPUT);
-    pinMode(mux_pin3, OUTPUT);
+void muxSetup() {
+    for (int i = 0; i < numIrSensors; ++i) {
+        pinMode(muxPin0 + i, OUTPUT);
+    }
 }
 
-int read_mux_analog_pin(int pin) {
-    reset_mux_pins();
-    delay(time_delay_ms);
+// Reads the nth analog pin, where n is pin.
+// The analog pins are labelled from left to right, 0 - 8.
+int readMuxAnalogPin(int pin) {
+    resetMuxPins();
+    digitalWrite(muxPin0 + pin, HIGH);
 
-    // Convert pin integer to binary output
-    if  (pin % 2 == 1) {
-        digitalWrite(mux_pin0, HIGH);
-    }
-    pin /= 2;
-    if  (pin % 2 == 1) {
-        digitalWrite(mux_pin1, HIGH);
-    }
-    pin /= 2;
-    if  (pin % 2 == 1) {
-        digitalWrite(mux_pin2, HIGH);
-    }
-    pin /= 2;
-    if  (pin % 2 == 1) {
-        digitalWrite(mux_pin3, HIGH);
-    }
-    
-    delay(time_delay_ms);
-    return analogRead(MUX_SIGNAL_PIN);
+    return analogRead(A0);
 };
 
-void reset_mux_pins() {
-    digitalWrite(mux_pin0, LOW);
-    digitalWrite(mux_pin1, LOW);
-    digitalWrite(mux_pin2, LOW);
-    digitalWrite(mux_pin3, LOW);
+// Switches off mux pins.
+void resetMuxPins() {
+    for (int i = 0; i < numIrSensors; ++i) {
+        digitalWrite(muxPin0 + i, LOW);
+    }
 }
